@@ -1,0 +1,1 @@
+Un ejercicio en PHP nativo(Modelo, Vista y Controlador) en el cual se gestiona el control de usuarios y proyectos en una Base de Datos utilizando SQL.
