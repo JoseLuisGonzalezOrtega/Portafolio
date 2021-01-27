@@ -1,1 +1,1 @@
-Un sencillo ejercicio donde valido con PHP un formulario con todos los eleméntos.
+Un sencillo ejercicio donde valido en PHP un formulario con todos sus eleméntos.
