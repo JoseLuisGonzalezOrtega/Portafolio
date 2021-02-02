@@ -1,0 +1,194 @@
+<head>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    </head>
+    <body>
+        <a href="https://www.youtube.com/watch?v=UzJDcHh2kx8&feature=youtu.be">Link al vídeo</a>
+        <h1>Llistat Productes</h1>
+        <form action="#" id="formularifiltrar">
+            Precio: <input id="precio" type="text" name="precio"><br>          
+        </form>
+        
+        <button id="filtrar">Filtrar</button>
+        <table id="taula" border=1>
+                <th>Id</th>
+                <th>nom</th>
+                <th>Descripcio</th>
+                <th>Preu</th>            
+                <th>Operacions</th>
+        </table>
+    
+         <h1>Alta</h1>
+    
+        
+    
+        <form action="#" id="formulari">
+                Nom: <input type="text" name="nom"><br>
+                Descripcio: <input type="text" name="descripcio"><br>
+                Preu: <input type="text" name="preu"><br>            
+        </form>
+        <button id="afegirbtn">Crear</button>
+        
+        <div id="errors"></div>
+    
+    
+    </body>
+    </html>
+    
+    
+    <script>
+    
+    // Mètode ready: Es crida quan la pàgina s'ha carregat del tot
+    $(document).ready(function(){
+    
+        carregataula();  
+    
+        // Enregistrem events:
+    
+        // Quan fem click sobre el botó d'afegir un producte
+        // Executarem la funció afegirProducte
+        $('#afegirbtn').on('click',function() {   
+            afegirProducte();
+        });   
+          
+    
+        // Quan fem click sobre un botó de la classe 'delete'
+        // d’una de les files de la taula executarem la funció eliminarProducte
+        $('#taula').on('click','.delete',function() { 
+                // busquem el id de la fila en la que hem fet click  
+                var idr = $(this).parents('tr').attr('id');
+                // Cridem a la funció per esborrar el registre remot
+                eliminarProducte(idr);
+            });
+
+            $('#filtrar').on('click',function() { 
+                // busquem el id de la fila en la que hem fet click  
+                var idr = $("#precio").val();
+                // Cridem a la funció per esborrar el registre remot
+                carregataulaFiltro(idr);
+            });
+            
+    
+    });
+    function carregataula(){
+    // L’objecte ajax permet fer les crides d’un servei web REST
+    // En url: posem la URI
+    // En type: posarem el tipus de mètode, GET, POST, DELETE,..
+    // En success: posarem el codi que volem executar si la resposat a la 
+    //             crida ha funcionat correctament
+    $.ajax({
+        url: 'http://localhost/M07/M07Uf5API/projecte-laravel-alumnat-raktunak/public/api/productes',
+        type: 'get',
+        datatype: 'json',
+        success: function(resposta){
+            // Fem un for each per cada producte de la llista.      
+            $.each(resposta.data, function() {
+                        afegirFilaTaula(this); // L'afegim a la taula
+            });    
+            
+        }
+    });
+
+}
+
+
+function carregataulaFiltro(precio){
+    // L’objecte ajax permet fer les crides d’un servei web REST
+    // En url: posem la URI
+    // En type: posarem el tipus de mètode, GET, POST, DELETE,..
+    // En success: posarem el codi que volem executar si la resposat a la 
+    //             crida ha funcionat correctament
+   
+    $.ajax({
+        url: 'http://localhost/M07/M07Uf5API/projecte-laravel-alumnat-raktunak/public/api/productes/preuInferior/'+precio,
+        type: 'get',
+        datatype: 'json',
+        success: function(resposta){
+            // Fem un for each per cada producte de la llista.      
+        $('tr').slice(1).remove();
+            $.each(resposta.data, function() {
+                        afegirFilaTaula(this); // L'afegim a la taula
+            });    
+            
+        }
+    });
+
+}
+
+function afegirFilaTaula(producte) {
+    // Afegim una fila a la taula que té l’id 'taula'
+    // Cada fila <tr> tindrà també un id, que serà igual al codi del producte
+    // Per cada fila tindrem un botó que serà de la classe 'delete'
+    $('#taula').append("<tr id='"+ producte.id+"'>"+
+                           "<td>"+ producte.id + "</td>" +
+                           "<td>"+ producte.nom + "</td>" +
+                           "<td>"+ producte.descripcio + "</td>" +
+                           "<td>"+ producte.preu + "</td>" +
+                           "<td><button class='delete'>Eliminar</button>" +
+                        "</tr>");
+}
+
+
+function eliminarProducte(id)
+{
+    // L’objecte ajax permet fer les crides d’un servei web REST
+    // En url: posem la URI
+    // En type: posarem el tipus de mètode, GET, POST, DELETE,..
+    // En success: posarem el codi que volem executar si la resposat a la 
+    //             crida ha funcionat correctament.
+    // En error: posem el codi en cas que la crida no hagi funcionat.
+    console.log("eeeee");
+    $.ajax({
+            url: "http://localhost/M07/M07Uf5API/projecte-laravel-alumnat-raktunak/public/api/productes/"+id,
+            type: 'DELETE',
+            success: function(result) { 
+                                          
+                $("#"+id).remove(); 
+            
+            },
+            error: function funtion($xhr) {
+                var data = $xhr.responseJSON;
+                alert(data.message);
+            }
+        });
+
+}
+
+
+function afegirProducte() {
+    
+    // L’objecte ajax permet fer les crides d’un servei web REST
+    // En url: posem la URI
+    // En type: posarem el tipus de mètode, GET, POST, DELETE,..
+    // En success: posarem el codi que volem executar si la resposat a la 
+    //             crida ha funcionat correctament.
+    // En error: posem el codi en cas que la crida no hagi funcionat.
+
+	// Al cridar serialize() del formulari obtenim les dades que volem 
+      // enviar via POST. Sera alguna cosa semblant a 
+      //  {"nom": "llapis blau", "descripcio": "llapis", "preu": 4,5}
+
+    $.ajax({
+            url: "http://localhost/M07/M07Uf5API/projecte-laravel-alumnat-raktunak/public/api/productes",
+            type: 'POST',
+            data: $('#formulari').serialize(),
+            datatype: 'json',
+            success: function(result) {
+                afegirFilaTaula(result.data);
+            },
+            error: function funtion($xhr) {
+                var resposta = $xhr.responseJSON;
+                $('#errors').text("");
+                $('#errors').append("<ul>");
+                $.each(resposta.data, function() {
+                         $('#errors').append("<li>" +this+"</li>");
+                         console.log(this);
+                });
+                $('#errors').append("</ul>");
+                // En cas d’error mostrem els errors en el <div> amb 
+                // id errors.
+            }
+    });
+    
+}
+
+</script>
